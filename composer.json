@@ -1,0 +1,27 @@
+{
+  "name": "mijohansen/php-slim-swagger",
+  "description": "Simpler way to hook a swagger api into slim-framework.",
+  "type": "library",
+  "version": "0.0.1",
+  "minimum-stability": "dev",
+  "prefer-stable": true,
+  "authors": [
+    {
+      "name": "Michael Johansen",
+      "email": "michael.johansen@gmail.com"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "psx/model": "^2.0",
+    "slim/slim": "^3.10",
+    "psx/schema": "^2.4",
+    "composer/spdx-licenses": "^1.4",
+    "doctrine/annotations": "1.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "SlimSwagger\\": "src"
+    }
+  }
+}
