@@ -2,7 +2,7 @@
 
 namespace SlimSwagger;
 
-use PSX\Model\Swagger\Operation;
+use PSX\Model\Swagger\Parameter;
 
 /**
  * Created by PhpStorm.
@@ -10,7 +10,6 @@ use PSX\Model\Swagger\Operation;
  * Date: 03/08/2018
  * Time: 17:16
  */
-
 class Route extends \Slim\Route {
 
     /**
@@ -18,17 +17,21 @@ class Route extends \Slim\Route {
      */
     protected $operation;
 
+    /**
+     * @var Api
+     */
+    protected $apiObject;
 
     public function isSwaggerPath() {
         return !is_null($this->operation);
     }
 
     /**
-     * @return Operation
+     * @return \PSX\Model\Swagger\Operation
      */
-    public function getOperation(){
-        if(is_null($this->operation)){
-            $this->operation =  new Operation();
+    public function getOperation() {
+        if (is_null($this->operation)) {
+            $this->operation = new \PSX\Model\Swagger\Operation();
         }
         return $this->operation;
     }
@@ -36,17 +39,51 @@ class Route extends \Slim\Route {
     /**
      * @return $this
      */
-    public function desc($description){
+    public function desc($description) {
         $this->getOperation()->setDescription($description);
         return $this;
     }
 
     /**
-     * @return $this
+     * @return Route
      */
-    public function summary($summary){
+    public function summary($summary) {
         $this->getOperation()->setSummary($summary);
         return $this;
     }
 
+    /**
+     * @param $apiObject
+     * @return Route
+     */
+    public function setApiObject(Api $apiObject) {
+        $this->apiObject = $apiObject;
+        return $this;
+    }
+
+    /**
+     * @return Api
+     */
+    public function getApiObject() {
+        return $this->apiObject;
+    }
+    /**
+     *
+     */
+    /**
+     * @return $this
+     */
+    public function setRequestClass($requestClass) {
+        $parameters = $this->getOperation()->getParameters();
+        $this->getApiObject()->getRouter()->addDefinition($requestClass);
+        $param = new Parameter();
+        $param->setIn("body");
+        $param->setRequired(true);
+        $param->setName("CreateContestRequest");
+        $param->setSchema(['$ref' => "#/definitions/CreateContestRequest"]);
+        $param->setType("object");
+        $parameters[] = $param;
+        $this->getOperation()->setParameters($parameters);
+        return $this;
+    }
 }

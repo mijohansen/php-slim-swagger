@@ -15,7 +15,6 @@ use PSX\Model\Swagger\Responses;
 use PSX\Model\Swagger\Swagger;
 use PSX\Schema\Parser\Popo\Dumper;
 use Slim\Interfaces\RouteInterface;
-use SlimSwagger\Route;
 
 if (!function_exists('is_iterable')) {
     function is_iterable($obj) {
@@ -68,7 +67,7 @@ class Util {
      * @param Route $route
      * @return Path
      */
-    static public function swaggerRouteToOperation(Route $route) {
+    static public function swaggerRouteToOperation(Route $route, Path $path) {
         $operation = $route->getOperation();
         $operation->setOperationId($route->getIdentifier());
         $responses = new Responses();
@@ -76,8 +75,16 @@ class Util {
         $response->setDescription('No response buddy');
         $responses[200] = $response;
         $operation->setResponses($responses);
-        $path = new Path();
-        $path->setGet($operation);
+        foreach ($route->getMethods() as $method) {
+            switch ($method) {
+                case "GET":
+                    $path->setGet($operation);
+                    break;
+                case "POST":
+                    $path->setPost($operation);
+                    break;
+            }
+        }
         return $path;
     }
 
@@ -88,14 +95,14 @@ class Util {
      */
     static public function addRouteToSwagger(Swagger $swagger, Route $route) {
         static $parser;
-        if(is_null($parser)){
+        if (is_null($parser)) {
             $parser = new Std();
         }
         $pattern = $route->getPattern();
         $route_segments = $parser->parse($pattern)[0];
         $parameters = [];
-        foreach ($route_segments as $segment){
-            if(is_array($segment)){
+        foreach ($route_segments as $segment) {
+            if (is_array($segment)) {
                 $param = new Parameter();
                 $param->setName($segment[0]);
                 $param->setIn("path");
@@ -103,10 +110,16 @@ class Util {
                 $parameters[] = $param;
             }
         }
-        $path = self::swaggerRouteToOperation($route);
-        if(count($parameters)) {
+        $path = new Path();
+        if (count($parameters)) {
             $path->setParameters($parameters);
         }
+        foreach ($swagger->getPaths() as $existing_pattern => $existing_path) {
+            if ($pattern === $existing_pattern) {
+                $path = $existing_path;
+            }
+        }
+        $path = self::swaggerRouteToOperation($route, $path);
         $swagger->addPath($pattern, $path);
         return $swagger;
     }

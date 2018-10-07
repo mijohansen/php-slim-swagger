@@ -7,6 +7,8 @@ use Slim\App;
 
 class Router extends \Slim\Router {
 
+    private $definitions = [];
+
     /**
      * Create a new Route object
      *
@@ -55,5 +57,21 @@ class Router extends \Slim\Router {
             $swagger->setProduces(["application/json"]);
             return $swagger;
         };
+    }
+
+    /**
+     * @param $definition
+     * @return Router
+     */
+    public function addDefinition($definition) {
+        $this->definitions[] = $definition;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getDefinitions() {
+        return $this->definitions;
     }
 }

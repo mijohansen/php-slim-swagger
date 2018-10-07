@@ -27,6 +27,8 @@ class Api {
 
     private $tags;
 
+
+
     /**
      * Api constructor.
      * @param App $app
@@ -52,6 +54,7 @@ class Api {
     public function get($pattern, $callable) {
         $route = $this->app->get($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -63,6 +66,7 @@ class Api {
     public function post($pattern, $callable) {
         $route = $this->app->post($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -74,6 +78,7 @@ class Api {
     public function put($pattern, $callable) {
         $route = $this->app->put($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -85,6 +90,7 @@ class Api {
     public function patch($pattern, $callable) {
         $route = $this->app->patch($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -96,6 +102,7 @@ class Api {
     public function delete($pattern, $callable) {
         $route = $this->app->delete($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -107,6 +114,7 @@ class Api {
     public function options($pattern, $callable) {
         $route = $this->app->options($pattern, $callable);
         $route->getOperation()->setTags($this->tags);
+        $route->setApiObject($this);
         return $route;
     }
 
@@ -210,14 +218,17 @@ class Api {
         $this->tags = $tags;
     }
 
+ 
+
     /**
      * @param string $path
      * @return Swagger;
      */
     public function addSwaggerRoute($path = "/swagger.json") {
         Router::attach($this->app);
-        $this->app->get($path, function (Request $req, Response $res) {
+        $this->app->get($path, function (Request $req, Response $res)  {
             $routes = $this->get("router")->getRoutes();
+            $definitions = $this->get("router")->getDefinitions();
             $swagger = $this->get("swagger");
             $host = $req->getUri()->getHost();
             $port = $req->getUri()->getPort();
@@ -231,6 +242,21 @@ class Api {
                 if (Util::isSwaggerRoute($route)) {
                     $swagger = Util::addRouteToSwagger($swagger, $route);
                 }
+            }
+            foreach ($definitions as $definitionClassName) {
+                $name = array_pop(explode("\\", $definitionClassName));
+                $reflectionClass = new $definitionClassName();
+                $reflect = new \ReflectionClass($reflectionClass);
+                $definition = new \stdClass();
+                $definition->properties = [];
+                foreach ($reflect->getProperties() as $property) {
+                    $definition->properties[$property->getName()] = [
+                        "type" => "string"
+                    ];
+                }
+                $definition->type = "object";
+                $definition->required = [];
+                $swagger->addDefinition($name, $definition);
             }
             return $res->withJson(Util::dump($swagger));
         });
