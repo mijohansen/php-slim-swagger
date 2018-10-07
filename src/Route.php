@@ -74,13 +74,14 @@ class Route extends \Slim\Route {
      * @return $this
      */
     public function setRequestClass($requestClass) {
+        $name = array_pop(explode("\\", $requestClass));
         $parameters = $this->getOperation()->getParameters();
         $this->getApiObject()->getRouter()->addDefinition($requestClass);
         $param = new Parameter();
         $param->setIn("body");
         $param->setRequired(true);
-        $param->setName("CreateContestRequest");
-        $param->setSchema(['$ref' => "#/definitions/CreateContestRequest"]);
+        $param->setName($name);
+        $param->setSchema(['$ref' => "#/definitions/" . $name]);
         $param->setType("object");
         $parameters[] = $param;
         $this->getOperation()->setParameters($parameters);
