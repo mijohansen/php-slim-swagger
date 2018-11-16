@@ -37,13 +37,14 @@ class Util {
         }
         $dumped = $dumper->dump($mixed);
 
-        if (is_object($mixed)) {
-            //echo get_class($mixed).PHP_EOL;
-        }
+        //if (is_object($mixed)) {
+        //echo get_class($mixed).PHP_EOL;
+        //}
 
         if (is_iterable($dumped)) {
             foreach ($dumped as $prop => $value) {
                 if (is_a($value, \ArrayObject::class)) {
+                    /** @var \ArrayObject $value */
                     if ($value->getFlags() === 0) {
                         $new_array = [];
                         foreach ($value->getArrayCopy() as $valuex => $element) {
@@ -60,32 +61,8 @@ class Util {
     }
 
     static public function isSwaggerRoute(RouteInterface $route) {
+        /** @var Route $route */
         return (is_a($route, Route::class) && $route->isSwaggerPath());
-    }
-
-    /**
-     * @param Route $route
-     * @return Path
-     */
-    static public function swaggerRouteToOperation(Route $route, Path $path) {
-        $operation = $route->getOperation();
-        $operation->setOperationId($route->getIdentifier());
-        $responses = new Responses();
-        $response = new \PSX\Model\Swagger\Response();
-        $response->setDescription('No response buddy');
-        $responses[200] = $response;
-        $operation->setResponses($responses);
-        foreach ($route->getMethods() as $method) {
-            switch ($method) {
-                case "GET":
-                    $path->setGet($operation);
-                    break;
-                case "POST":
-                    $path->setPost($operation);
-                    break;
-            }
-        }
-        return $path;
     }
 
     /**
@@ -122,6 +99,32 @@ class Util {
         $path = self::swaggerRouteToOperation($route, $path);
         $swagger->addPath($pattern, $path);
         return $swagger;
+    }
+
+    /**
+     * @param Route $route
+     * @param Path $path
+     * @return Path
+     */
+    static public function swaggerRouteToOperation(Route $route, Path $path) {
+        $operation = $route->getOperation();
+        $operation->setOperationId($route->getIdentifier());
+        $responses = new Responses();
+        $response = new \PSX\Model\Swagger\Response();
+        $response->setDescription('No response buddy');
+        $responses[200] = $response;
+        $operation->setResponses($responses);
+        foreach ($route->getMethods() as $method) {
+            switch ($method) {
+                case "GET":
+                    $path->setGet($operation);
+                    break;
+                case "POST":
+                    $path->setPost($operation);
+                    break;
+            }
+        }
+        return $path;
     }
 
 }

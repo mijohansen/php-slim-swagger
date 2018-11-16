@@ -2,6 +2,7 @@
 
 namespace SlimSwagger;
 
+use PSX\Model\Swagger\Operation;
 use PSX\Model\Swagger\Parameter;
 
 /**
@@ -27,16 +28,7 @@ class Route extends \Slim\Route {
     }
 
     /**
-     * @return \PSX\Model\Swagger\Operation
-     */
-    public function getOperation() {
-        if (is_null($this->operation)) {
-            $this->operation = new \PSX\Model\Swagger\Operation();
-        }
-        return $this->operation;
-    }
-
-    /**
+     * @param $description
      * @return $this
      */
     public function desc($description) {
@@ -45,7 +37,18 @@ class Route extends \Slim\Route {
     }
 
     /**
-     * @return Route
+     * @return Operation
+     */
+    public function getOperation() {
+        if (is_null($this->operation)) {
+            $this->operation = new Operation();
+        }
+        return $this->operation;
+    }
+
+    /**
+     * @param $summary
+     * @return $this
      */
     public function summary($summary) {
         $this->getOperation()->setSummary($summary);
@@ -53,24 +56,7 @@ class Route extends \Slim\Route {
     }
 
     /**
-     * @param $apiObject
-     * @return Route
-     */
-    public function setApiObject(Api $apiObject) {
-        $this->apiObject = $apiObject;
-        return $this;
-    }
-
-    /**
-     * @return Api
-     */
-    public function getApiObject() {
-        return $this->apiObject;
-    }
-    /**
-     *
-     */
-    /**
+     * @param $requestClass
      * @return $this
      */
     public function setRequestClass($requestClass) {
@@ -81,10 +67,28 @@ class Route extends \Slim\Route {
         $param->setIn("body");
         $param->setRequired(true);
         $param->setName($name);
-        $param->setSchema(['$ref' => "#/definitions/" . $name]);
+        $schema = new \stdClass();
+        $schema->ref = "#/definitions/" . $name;
+        $param->setSchema($schema);
         $param->setType("object");
         $parameters[] = $param;
         $this->getOperation()->setParameters($parameters);
+        return $this;
+    }
+
+    /**
+     * @return Api
+     */
+    public function getApiObject() {
+        return $this->apiObject;
+    }
+
+    /**
+     * @param $apiObject
+     * @return $this
+     */
+    public function setApiObject(Api $apiObject) {
+        $this->apiObject = $apiObject;
         return $this;
     }
 }
