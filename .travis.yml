@@ -3,7 +3,7 @@ php:
 - '5.5'
 - '7.1'
 
-before_script:
-   - composer install --prefer-source --no-interaction --dev
+install:
+- composer install --prefer-source --no-interaction --dev
 
 script: phpunit
