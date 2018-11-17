@@ -1,8 +1,22 @@
+sudo: false
 language: php
 php:
 - 7.1
 
+before_script:
+- phpenv config-rm xdebug.ini
+- git config --global user.name travis-ci
+- git config --global user.email travis@example.com
+
 install:
 - composer install --prefer-source --no-interaction --dev
 
-script: phpunit
+script:
+- phpunit
+
+after_script:
+- chmod a+x /.travis/automerge.sh
+- "BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master GITHUB_REPO=mijohansen/php-slim-swagger /.travis/automerge.sh"
+
+
+secure: "vto48Lm5IFWush70SRfReZV95mwgyrtg53KMkbhkmsPj0XyVUUO+p2FODuWTdYEqOyz86jr3uBOGlu5LJqJe/fVGtWNaRFD+dwAv23XJf2lC06lj7S0Yn69L/2b3GgotgutOjuYQh4ff5cV5S4gztLFa7R04aYA5wAUsX5edw3F25lvnfpfDp7WGz0OqEZO4ZsZTI4RhzTIFtg4Dhkg5da7TlUAPL4JmiEJDwWnkLWx58C1S0ztpiWAcEGuQR9npHu+A9h0ZFbMb4aJJ3b2ajRtV/4Jzz8iKgOpleZHKo1CzIwJXi3NQ2ySzvzRV57Sa/TSXOc+aR02H2kZRf4POtvqYSANUyNojsG4eCUDeGEe0ZZHi7bVAKPMFRnNcISzhWyg43OQz68CJ2hulVS0V+EzxtVg+YeUbfWbgxrCVo9syy51gJ8y0rlR36d9oEDx8660IwnEGhQimkupfFslAvnS+/+SU0AbbOunnvj+LClmDqpGR49+9G18zu4HMBsJBA16LD28fkVmdiBxqr0P2wASLEXKXlX3LytpVfOTb+fG/N6U+Iir/KV8ky3h+b+YEElIvzcQqi7LoA8RAjLhK9UpwpTRKaEfayTcUPseMBYWYNb9wh09TUEfxBM/OY6Euhb4UOF4zhLE3aIF33DSHwHlMTYUbHlr5gJH2qFUqrMg="
