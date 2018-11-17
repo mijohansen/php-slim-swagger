@@ -8,12 +8,27 @@
 
 namespace SlimSwagger;
 
+use Eloquent\Composer\Configuration\ConfigurationReader;
 use Psr\Container\ContainerInterface;
+use PSX\Model\Swagger\Info;
 use PSX\Model\Swagger\Swagger;
+use Slim\App;
 use Slim\Container;
 use Slim\Interfaces\RouterInterface;
 
 class SlimSwagger {
+
+    /**
+     * Function will read from composer json and set it to swagger.
+     */
+    static public function setFromComposerJson(App $app, $composerJsonPath) {
+        $reader = new ConfigurationReader();
+        $swagger = $app->getContainer()->get("swagger");
+        /** @var Swagger $swagger */
+        $ob = $reader->read($composerJsonPath);
+        $swagger->setName($ob->name());
+
+    }
 
     /**
      * @param Container|null $container
@@ -51,6 +66,7 @@ class SlimSwagger {
             $swagger = new Swagger();
             $swagger->setConsumes(["application/json"]);
             $swagger->setProduces(["application/json"]);
+            $swagger->setInfo(new Info());
             return $swagger;
         };
         return $container;
