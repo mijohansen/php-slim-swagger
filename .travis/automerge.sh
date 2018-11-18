@@ -6,6 +6,8 @@
 export GIT_COMMITTER_EMAIL='travis@travis'
 export GIT_COMMITTER_NAME='Travis CI'
 
+push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$GITHUB_REPO"
+
 if ! grep -q "$BRANCHES_TO_MERGE_REGEX" <<< "$TRAVIS_BRANCH"; then
     printf "Current branch %s doesn't match regex %s, exiting\\n" \
         "$TRAVIS_BRANCH" "$BRANCHES_TO_MERGE_REGEX" >&2
@@ -39,7 +41,8 @@ if [[ $LAST_COMMIT_DATE != $TODAYS_DATE ]]; then
     >&2 echo "Bumping tag"
     SEMVER_NEW_TAG=$($TRAVIS_BUILD_DIR/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
 else
-    >&2 echo "Will use todays patch. ${SEMVER_LAST_TAG}"
+    >&2 echo "Will use todays patch, just delete it from master. ${SEMVER_LAST_TAG}"
+    git push "$push_uri" :"$SEMVER_LAST_TAG"
     SEMVER_NEW_TAG=$SEMVER_LAST_TAG
 fi
 
@@ -47,8 +50,6 @@ echo "Using tag: $SEMVER_NEW_TAG"
 git tag $SEMVER_NEW_TAG &> /dev/null
 
 printf 'Pushing to %s\n' "$GITHUB_REPO" >&2
-
-push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$GITHUB_REPO"
 
 # Redirect to /dev/null to avoid secret leakage
 git push "$push_uri" "$BRANCH_TO_MERGE_INTO" --tags >/dev/null 2>&1
