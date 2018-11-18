@@ -25,10 +25,26 @@ git checkout "$BRANCH_TO_MERGE_INTO"
 printf 'Merging %s\n' "$TRAVIS_COMMIT" >&2
 git merge --ff-only "$TRAVIS_COMMIT"
 
+export SEMVER_LAST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
+
+if [ -z $SEMVER_LAST_TAG ]; then
+    >&2 echo "No tags defined"
+    SEMVER_LAST_TAG="0.0.1"
+fi
+
+git clone https://github.com/fsaintjacques/semver-tool /tmp/semver &> /dev/null
+SEMVER_NEW_TAG=$( ./vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
+git tag $SEMVER_NEW_TAG &> /dev/null
+echo $SEMVER_NEW_TAG
+
+
 printf 'Pushing to %s\n' "$GITHUB_REPO" >&2
 
 push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$GITHUB_REPO"
 
+
 # Redirect to /dev/null to avoid secret leakage
 git push "$push_uri" "$BRANCH_TO_MERGE_INTO" >/dev/null 2>&1
-git push "$push_uri" :"$TRAVIS_BRANCH" >/dev/null 2>&1
+
+# Deletes the branch
+# git push "$push_uri" :"$TRAVIS_BRANCH" >/dev/null 2>&1

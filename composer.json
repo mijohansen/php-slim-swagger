@@ -21,11 +21,17 @@
     "eloquent/composer-config-reader": "^2.1"
   },
   "require-dev": {
-    "phpunit/phpunit": "*"
+    "phpunit/phpunit": "*",
+    "vierbergenlars/php-semver": "dev-master"
   },
   "autoload": {
     "psr-4": {
       "SlimSwagger\\": "src"
     }
+  },
+  "scripts": {
+    "post-install-cmd": "mkdir -p ./vendor/vierbergenlars/php-semver/vendor; echo '<?php require __DIR__.\"/../../../autoload.php\";' > ./vendor/vierbergenlars/php-semver/vendor/autoload.php"
   }
+
+
 }
