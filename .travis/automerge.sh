@@ -43,13 +43,12 @@ else
     SEMVER_NEW_TAG=$SEMVER_LAST_TAG
 fi
 
+echo "Using tag: $SEMVER_NEW_TAG"
 git tag $SEMVER_NEW_TAG &> /dev/null
-echo $SEMVER_NEW_TAG
 
 printf 'Pushing to %s\n' "$GITHUB_REPO" >&2
 
 push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$GITHUB_REPO"
-
 
 # Redirect to /dev/null to avoid secret leakage
 git push "$push_uri" "$BRANCH_TO_MERGE_INTO" --tags >/dev/null 2>&1
