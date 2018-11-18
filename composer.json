@@ -30,8 +30,5 @@
     }
   },
   "scripts": {
-    "post-install-cmd": "mkdir -p ./vendor/vierbergenlars/php-semver/vendor; echo '<?php require __DIR__.\"/../../../autoload.php\";' > ./vendor/vierbergenlars/php-semver/vendor/autoload.php"
   }
-
-
 }
