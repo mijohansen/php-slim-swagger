@@ -11,10 +11,46 @@ use PSX\Model\Swagger\Swagger;
 use Slim\App;
 
 /**
- * Created by PhpStorm.
- * User: michael
- * Date: 03/08/2018
- * Time: 17:28
+ * @method Route addDefinition($name, $schema)
+ * @method Route addPath($path, $value)
+ * @method Route getBasePath()
+ * @method Route getConsumes()
+ * @method Route getContact()
+ * @method Route getDefinitions()
+ * @method Route getDescription()
+ * @method Route getExternalDocs()
+ * @method Route getHost()
+ * @method Route getLicense()
+ * @method Route getParameters()
+ * @method Route getPaths()
+ * @method Route getProduces()
+ * @method Route getResponses()
+ * @method Route getSchemes()
+ * @method Route getSecurity()
+ * @method Route getSecurityDefinitions()
+ * @method Route getSwagger()
+ * @method Route getTags()
+ * @method Route getTermsOfService()
+ * @method Route getTitle()
+ * @method Route getVersion()
+ * @method Route setBasePath($basePath)
+ * @method Route setConsumes($consumes)
+ * @method Route setContact($contact)
+ * @method Route setDefinitions($definitions)
+ * @method Route setDescription($description)
+ * @method Route setExternalDocs($externalDocs)
+ * @method Route setHost($host)
+ * @method Route setInfo($info)
+ * @method Route setParameters($parameters)
+ * @method Route setPaths($paths)
+ * @method Route setProduces($produces)
+ * @method Route setResponses($responses)
+ * @method Route setSchemes($schemes)
+ * @method Route setSecurity($security)
+ * @method Route setSecurityDefinitions($securityDefinitions)
+ * @method Route setTermsOfService($termsOfService)
+ * @method Route setTitle($title)
+ * @method Route setVersion($version)
  */
 class Api {
 
@@ -128,26 +164,30 @@ class Api {
     }
 
     /**
-     * @param $licenseIdentifier
+     * @param $licenseIdentifier |License
      * @return $this
      */
-    public function setApiLicense($licenseIdentifier) {
-        $SpdxLicenses = new SpdxLicenses();
-        $license = $SpdxLicenses->getLicenseByIdentifier($licenseIdentifier);
-        $info = $this->getApiInfo();
-        $swaggerLicenseField = new License();
-        $swaggerLicenseField->setName($license[0]);
-        $swaggerLicenseField->setUrl($license[2]);
-        $info->setLicense($swaggerLicenseField);
-        $this->getSwagger()->setInfo($info);
+    public function setLicense($licenseIdentifier) {
+        $info = $this->getInfo();
+        if (is_string($licenseIdentifier)) {
+            $SpdxLicenses = new SpdxLicenses();
+            $license = $SpdxLicenses->getLicenseByIdentifier($licenseIdentifier);
+            $swaggerLicenseField = new License();
+            $swaggerLicenseField->setName($license[0]);
+            $swaggerLicenseField->setUrl($license[2]);
+            $info->setLicense($swaggerLicenseField);
+        } else {
+            $info->setLicense($licenseIdentifier);
+        }
+        $this->getSwaggerModel()->setInfo($info);
         return $this;
     }
 
     /**
      * @return Info
      */
-    public function getApiInfo() {
-        $info = $this->getSwagger()->getInfo();
+    public function getInfo() {
+        $info = $this->getSwaggerModel()->getInfo();
         if (is_null($info)) {
             $info = new Info();
         }
@@ -157,15 +197,33 @@ class Api {
     /**
      * @return Swagger;
      */
-    public function getSwagger() {
+    public function getSwaggerModel() {
         return $this->app->getContainer()->get("swagger");
+    }
+
+    /**
+     * We just forward the method calls to Operation.
+     *
+     * @param $name
+     * @param $arguments
+     * @return $this
+     */
+    public function __call($name, $arguments) {
+        if (method_exists($this->getSwaggerModel(), $name)) {
+            call_user_func_array([$this->getSwaggerModel(), $name], $arguments);
+        }
+        if (method_exists($this->getInfo(), $name)) {
+            call_user_func_array([$this->getInfo(), $name], $arguments);
+        }
+
+        return $this;
     }
 
     /**
      * @return $this
      */
     public function setApiContact() {
-        $info = $this->getApiInfo();
+        $info = $this->getInfo();
         $contact = new Contact();
         foreach (func_get_args() as $arg) {
             if (filter_var($arg, FILTER_VALIDATE_EMAIL)) {
@@ -180,41 +238,9 @@ class Api {
         return $this;
     }
 
-    /**
-     * @param $version
-     * @return $this
-     */
-    public function setVersion($version) {
-        $this->getApiInfo()->setVersion($version);
-        return $this;
-    }
 
-    /**
-     * @param $title
-     * @return $this
-     */
-    public function setTitle($title) {
-        $this->getApiInfo()->setTitle($title);
-        return $this;
-    }
 
-    /**
-     * @param $description
-     * @return $this
-     */
-    public function setDescription($description) {
-        $this->getApiInfo()->setDescription($description);
-        return $this;
-    }
 
-    /**
-     * @param $termOfService
-     * @return $this
-     */
-    public function setTermsOfService($termOfService) {
-        $this->getApiInfo()->setTermsOfService($termOfService);
-        return $this;
-    }
 
     public function setTags(array $tags) {
         $this->tags = $tags;

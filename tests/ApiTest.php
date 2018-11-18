@@ -22,7 +22,7 @@ final class ApiTest extends TestCase {
         $container = SlimSwagger::init();
         $app = new App($container);
         $api = new Api($app);
-        $swagger = $api->getSwagger();
+        $swagger = $api->getSwaggerModel();
         $this->assertInstanceOf(Swagger::class, $swagger);
         //ob_start();
         $content = $app->run(true);
