@@ -42,8 +42,10 @@ if [[ $LAST_COMMIT_DATE != $TODAYS_DATE ]]; then
     SEMVER_NEW_TAG=$($TRAVIS_BUILD_DIR/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
 else
     >&2 echo "Will use todays patch, just delete it from master. ${SEMVER_LAST_TAG}"
-    git push "$push_uri" :"$SEMVER_LAST_TAG"
     SEMVER_NEW_TAG=$SEMVER_LAST_TAG
+    if [[ $SEMVER_LAST_TAG != "0.0.1" ]]; then
+        git push "$push_uri" :"$SEMVER_LAST_TAG"
+    fi
 fi
 
 echo "Using tag: $SEMVER_NEW_TAG"
