@@ -32,8 +32,7 @@ if [ -z $SEMVER_LAST_TAG ]; then
     SEMVER_LAST_TAG="0.0.1"
 fi
 
-git clone https://github.com/fsaintjacques/semver-tool /tmp/semver &> /dev/null
-SEMVER_NEW_TAG=$(vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
+SEMVER_NEW_TAG=$($TRAVIS_BUILD_DIR/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
 git tag $SEMVER_NEW_TAG &> /dev/null
 echo $SEMVER_NEW_TAG
 
