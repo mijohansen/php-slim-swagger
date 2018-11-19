@@ -123,4 +123,25 @@ class Util {
         return $path;
     }
 
+    static public function getMethodDocBlock($to, $from, $lines = []) {
+        $reflection = new \ReflectionClass($from);
+        $existing = new \ReflectionClass($to);
+        $routeMethodNames = [];
+        foreach ($existing->getMethods() as $method) {
+            $routeMethodNames[] = $method->name;
+        }
+        foreach ($reflection->getMethods() as $method) {
+            $params = [];
+            foreach ($method->getParameters() as $param) {
+                $params[] = "$" . $param->getName();
+            }
+            $params_string = implode(", ", $params);
+            if (!in_array($method->name, $routeMethodNames) && !$method->isConstructor()) {
+                $lines[] = "* @method {$existing->getShortName()} {$method->name}($params_string)";
+            }
+        }
+        $lines = array_unique($lines);
+        sort($lines);
+        return $lines;
+    }
 }
