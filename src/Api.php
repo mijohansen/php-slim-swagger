@@ -5,6 +5,7 @@ namespace SlimSwagger;
 use Composer\Spdx\SpdxLicenses;
 use Psr\Container\ContainerInterface;
 use PSX\Model\Swagger\Contact;
+use PSX\Model\Swagger\ExternalDocs;
 use PSX\Model\Swagger\Info;
 use PSX\Model\Swagger\License;
 use PSX\Model\Swagger\Swagger;
@@ -18,7 +19,6 @@ use Slim\App;
  * @method Route getContact()
  * @method Route getDefinitions()
  * @method Route getDescription()
- * @method Route getExternalDocs()
  * @method Route getHost()
  * @method Route getLicense()
  * @method Route getParameters()
@@ -32,10 +32,10 @@ use Slim\App;
  * @method Route getTags()
  * @method Route getTermsOfService()
  * @method Route getTitle()
+ * @method Route getUrl()
  * @method Route getVersion()
  * @method Route setBasePath($basePath)
  * @method Route setConsumes($consumes)
- * @method Route setContact($contact)
  * @method Route setDefinitions($definitions)
  * @method Route setDescription($description)
  * @method Route setExternalDocs($externalDocs)
@@ -50,6 +50,7 @@ use Slim\App;
  * @method Route setSecurityDefinitions($securityDefinitions)
  * @method Route setTermsOfService($termsOfService)
  * @method Route setTitle($title)
+ * @method Route setUrl($url)
  * @method Route setVersion($version)
  */
 class Api {
@@ -190,8 +191,21 @@ class Api {
         $info = $this->getSwaggerModel()->getInfo();
         if (is_null($info)) {
             $info = new Info();
+            $this->getSwaggerModel()->setInfo($info);
         }
         return $info;
+    }
+
+    /**
+     * @return ExternalDocs;
+     */
+    public function getExternalDocs() {
+        $externalDocs = $this->getSwaggerModel()->getExternalDocs();
+        if (is_null($externalDocs)) {
+            $externalDocs = new ExternalDocs();
+            $this->getSwaggerModel()->setExternalDocs($externalDocs);
+        }
+        return $externalDocs;
     }
 
     /**
@@ -215,32 +229,35 @@ class Api {
         if (method_exists($this->getInfo(), $name)) {
             call_user_func_array([$this->getInfo(), $name], $arguments);
         }
-
+        if (method_exists($this->getExternalDocs(), $name)) {
+            call_user_func_array([$this->getExternalDocs(), $name], $arguments);
+        }
         return $this;
     }
 
     /**
+     * @param $mixed | Contact
      * @return $this
      */
-    public function setApiContact() {
+    public function setContact($mixed) {
         $info = $this->getInfo();
-        $contact = new Contact();
-        foreach (func_get_args() as $arg) {
-            if (filter_var($arg, FILTER_VALIDATE_EMAIL)) {
-                $contact->setEmail($arg);
-            } elseif (filter_var($arg, FILTER_VALIDATE_URL)) {
-                $contact->setUrl($arg);
-            } else {
-                $contact->setName($arg);
+        if (is_a($mixed, Contact::class)) {
+            $info->setContact($mixed);
+        } else {
+            $contact = new Contact();
+            foreach (func_get_args() as $arg) {
+                if (filter_var($arg, FILTER_VALIDATE_EMAIL)) {
+                    $contact->setEmail($arg);
+                } elseif (filter_var($arg, FILTER_VALIDATE_URL)) {
+                    $contact->setUrl($arg);
+                } else {
+                    $contact->setName($arg);
+                }
             }
+            $info->setContact($contact);
         }
-        $info->setContact($contact);
         return $this;
     }
-
-
-
-
 
     public function setTags(array $tags) {
         $this->tags = $tags;

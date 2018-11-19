@@ -37,10 +37,6 @@ class Util {
         }
         $dumped = $dumper->dump($mixed);
 
-        //if (is_object($mixed)) {
-        //echo get_class($mixed).PHP_EOL;
-        //}
-
         if (is_iterable($dumped)) {
             foreach ($dumped as $prop => $value) {
                 if (is_a($value, \ArrayObject::class)) {

@@ -15,6 +15,7 @@ use SlimSwagger\Api;
 use SlimSwagger\Route;
 use SlimSwagger\SlimSwagger;
 use SlimSwagger\SwaggerAction;
+use SlimSwagger\Util;
 
 final class ApiTest extends TestCase {
 
@@ -55,5 +56,15 @@ final class ApiTest extends TestCase {
         $this->assertEquals(200, $response->getStatusCode());
         $content = json_decode((string)$response->getBody());
         $this->assertAttributeEquals("2.0", "swagger", $content);
+    }
+
+    public function testContactSetters() {
+        $app = new App(SlimSwagger::init());
+        $api = new Api($app);
+        $api->setContact("Michael Johansen");
+        $model = $api->getSwaggerModel();
+        $info = Util::dump($model);
+        $swagger = json_decode(json_encode($info));
+        $this->assertEquals("Michael Johansen", $swagger->info->contact->name);
     }
 }
