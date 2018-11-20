@@ -51,7 +51,7 @@ else
 fi
 
 echo "Using tag: $SEMVER_NEW_TAG"
-git tag -fa $SEMVER_NEW_TAG &> /dev/null
+git tag -f $SEMVER_NEW_TAG &> /dev/null
 
 printf 'Pushing to %s\n' "$TRAVIS_REPO_SLUG" >&2
 
