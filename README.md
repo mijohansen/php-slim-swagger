@@ -26,3 +26,12 @@ use SlimSwagger\SwaggerAction;
 
 $app->get('/swagger.json', SwaggerAction::class);
 ```
+
+
+SwaggerGroup
+SwaggerRoute
+SwaggerRouter
+SwaggerAction
+SwaggerUtil
+
+$group = new SwaggerGroup($app);
