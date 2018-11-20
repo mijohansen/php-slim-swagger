@@ -1,12 +1,12 @@
 #!/bin/bash -e
 
 : "${BRANCHES_TO_MERGE_REGEX?}" "${BRANCH_TO_MERGE_INTO?}"
-: "${GITHUB_SECRET_TOKEN?}" "${GITHUB_REPO?}"
+: "${GITHUB_SECRET_TOKEN?}" "${TRAVIS_REPO_SLUG?}"
 
 export GIT_COMMITTER_EMAIL='travis@travis'
 export GIT_COMMITTER_NAME='Travis CI'
 
-push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$GITHUB_REPO"
+push_uri="https://$GITHUB_SECRET_TOKEN@github.com/$TRAVIS_REPO_SLUG"
 
 if ! grep -q "$BRANCHES_TO_MERGE_REGEX" <<< "$TRAVIS_BRANCH"; then
     printf "Current branch %s doesn't match regex %s, exiting\\n" \
@@ -16,7 +16,7 @@ fi
 
 # Since Travis does a partial checkout, we need to get the whole thing
 repo_temp=$(mktemp -d)
-git clone "https://github.com/$GITHUB_REPO" "$repo_temp"
+git clone "https://github.com/$TRAVIS_REPO_SLUG" "$repo_temp"
 
 # shellcheck disable=SC2164
 cd "$repo_temp"
@@ -51,7 +51,7 @@ fi
 echo "Using tag: $SEMVER_NEW_TAG"
 git tag $SEMVER_NEW_TAG &> /dev/null
 
-printf 'Pushing to %s\n' "$GITHUB_REPO" >&2
+printf 'Pushing to %s\n' "$TRAVIS_REPO_SLUG" >&2
 
 # Redirect to /dev/null to avoid secret leakage
 git push "$push_uri" "$BRANCH_TO_MERGE_INTO" --tags >/dev/null 2>&1
