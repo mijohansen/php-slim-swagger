@@ -88,7 +88,6 @@ class Api {
         $route = $this->app->get($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -101,7 +100,6 @@ class Api {
         $route = $this->app->post($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -114,7 +112,6 @@ class Api {
         $route = $this->app->put($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -127,7 +124,6 @@ class Api {
         $route = $this->app->patch($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -140,7 +136,6 @@ class Api {
         $route = $this->app->delete($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -153,7 +148,6 @@ class Api {
         $route = $this->app->options($pattern, $callable);
         /** @var Route $route */
         $route->getOperation()->setTags($this->tags);
-        $route->setApiObject($this);
         return $route;
     }
 
@@ -215,25 +209,7 @@ class Api {
         return $this->app->getContainer()->get("swagger");
     }
 
-    /**
-     * We just forward the method calls to Operation.
-     *
-     * @param $name
-     * @param $arguments
-     * @return $this
-     */
-    public function __call($name, $arguments) {
-        if (method_exists($this->getSwaggerModel(), $name)) {
-            call_user_func_array([$this->getSwaggerModel(), $name], $arguments);
-        }
-        if (method_exists($this->getInfo(), $name)) {
-            call_user_func_array([$this->getInfo(), $name], $arguments);
-        }
-        if (method_exists($this->getExternalDocs(), $name)) {
-            call_user_func_array([$this->getExternalDocs(), $name], $arguments);
-        }
-        return $this;
-    }
+
 
     /**
      * @param $mixed | Contact
@@ -269,6 +245,26 @@ class Api {
     public function addSwaggerRoute($path = "/swagger.json") {
         Router::attach($this->app);
         $this->app->get($path, SwaggerAction::class);
+    }
+
+    /**
+     * We just forward the method calls to Operation.
+     *
+     * @param $name
+     * @param $arguments
+     * @return $this
+     */
+    public function __call($name, $arguments) {
+        if (method_exists($this->getSwaggerModel(), $name)) {
+            call_user_func_array([$this->getSwaggerModel(), $name], $arguments);
+        }
+        if (method_exists($this->getInfo(), $name)) {
+            call_user_func_array([$this->getInfo(), $name], $arguments);
+        }
+        if (method_exists($this->getExternalDocs(), $name)) {
+            call_user_func_array([$this->getExternalDocs(), $name], $arguments);
+        }
+        return $this;
     }
 }
 

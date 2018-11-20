@@ -1,6 +1,10 @@
 {
   "name": "mijohansen/slim-swagger",
   "description": "Simpler way to hook a swagger api into slim-framework.",
+  "keywords": [
+    "slim",
+    "swagger"
+  ],
   "type": "library",
   "license": "MIT",
   "minimum-stability": "dev",

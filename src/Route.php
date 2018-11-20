@@ -57,19 +57,7 @@ class Route extends \Slim\Route {
         return $this->operation;
     }
 
-    /**
-     * We just forward the method calls to Operation.
-     *
-     * @param $name
-     * @param $arguments
-     * @return $this
-     */
-    public function __call($name, $arguments) {
-        if (method_exists($this->getOperation(), $name)) {
-            call_user_func_array([$this->getOperation(), $name], $arguments);
-        }
-        return $this;
-    }
+
 
     /**
      * @param $requestClass
@@ -78,7 +66,7 @@ class Route extends \Slim\Route {
     public function setRequestClass($requestClass) {
         $name = array_pop(explode("\\", $requestClass));
         $parameters = $this->getOperation()->getParameters();
-        $this->getApiObject()->getRouter()->addDefinition($requestClass);
+        $this->container->get("router")->addDefinition($requestClass);
         $param = new Parameter();
         $param->setIn("body");
         $param->setRequired(true);
@@ -93,18 +81,16 @@ class Route extends \Slim\Route {
     }
 
     /**
-     * @return Api
-     */
-    public function getApiObject() {
-        return $this->apiObject;
-    }
-
-    /**
-     * @param $apiObject
+     * We just forward the method calls to Operation.
+     *
+     * @param $name
+     * @param $arguments
      * @return $this
      */
-    public function setApiObject(Api $apiObject) {
-        $this->apiObject = $apiObject;
+    public function __call($name, $arguments) {
+        if (method_exists($this->getOperation(), $name)) {
+            call_user_func_array([$this->getOperation(), $name], $arguments);
+        }
         return $this;
     }
 }

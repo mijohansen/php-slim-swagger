@@ -26,7 +26,8 @@ class SlimSwagger {
         $swagger = $app->getContainer()->get("swagger");
         /** @var Swagger $swagger */
         $ob = $reader->read($composerJsonPath);
-        $swagger->setName($ob->name());
+        $ob->homepage();
+
 
     }
 
