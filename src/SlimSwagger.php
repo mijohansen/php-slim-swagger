@@ -20,10 +20,12 @@ class SlimSwagger {
 
     /**
      * Function will read from composer json and set it to swagger.
+     * @param App $app
+     * @param $composerJsonPath
      */
     static public function setFromComposerJson(App $app, $composerJsonPath) {
         $reader = new ConfigurationReader();
-        $swagger = $app->getContainer()->get("swagger");
+        // $swagger = $app->getContainer()->get("swagger");
         /** @var Swagger $swagger */
         $ob = $reader->read($composerJsonPath);
         $ob->homepage();

@@ -12,7 +12,7 @@ initiated.
 
 Minimal example:
 ```php
-use Slim\App
+use Slim\App;
 use SlimSwagger\SlimSwagger;
 
 $container = SlimSwagger::init();
@@ -27,11 +27,3 @@ use SlimSwagger\SwaggerAction;
 $app->get('/swagger.json', SwaggerAction::class);
 ```
 
-
-SwaggerGroup
-SwaggerRoute
-SwaggerRouter
-SwaggerAction
-SwaggerUtil
-
-$group = new SwaggerGroup($app);

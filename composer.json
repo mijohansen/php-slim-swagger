@@ -17,6 +17,7 @@
   ],
   "require": {
     "php": ">=7.1",
+    "ext-json": "*",
     "psx/model": "^2.0",
     "slim/slim": "^3.10",
     "psx/schema": "^2.4",

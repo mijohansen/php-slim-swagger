@@ -2,6 +2,7 @@
 
 namespace SlimSwagger;
 
+use Prophecy\Exception\Doubler\MethodNotFoundException;
 use PSX\Model\Swagger\Operation;
 use PSX\Model\Swagger\Parameter;
 
@@ -57,8 +58,6 @@ class Route extends \Slim\Route {
         return $this->operation;
     }
 
-
-
     /**
      * @param $requestClass
      * @return $this
@@ -83,14 +82,21 @@ class Route extends \Slim\Route {
     /**
      * We just forward the method calls to Operation.
      *
-     * @param $name
+     * @param $method_name
      * @param $arguments
      * @return $this
      */
-    public function __call($name, $arguments) {
-        if (method_exists($this->getOperation(), $name)) {
-            call_user_func_array([$this->getOperation(), $name], $arguments);
+    public function __call($method_name, $arguments) {
+        $prefix = substr($method_name, 0, 3);
+        $proxied_objects = [
+            $this->getOperation()
+        ];
+        foreach ($proxied_objects as $proxied_object) {
+            if (method_exists($proxied_object, $method_name)) {
+                $result = call_user_func_array([$proxied_object, $method_name], $arguments);
+                return ($prefix === "set") ? $this : $result;
+            }
         }
-        return $this;
+        throw new MethodNotFoundException("Couldn't fint method " . $method_name . " in " . get_class($this) . ".", get_class($this), $method_name);
     }
 }

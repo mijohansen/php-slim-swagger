@@ -3,11 +3,14 @@
 namespace SlimSwagger;
 
 use Composer\Spdx\SpdxLicenses;
+use Prophecy\Exception\Doubler\MethodNotFoundException;
 use Psr\Container\ContainerInterface;
 use PSX\Model\Swagger\Contact;
 use PSX\Model\Swagger\ExternalDocs;
 use PSX\Model\Swagger\Info;
 use PSX\Model\Swagger\License;
+use PSX\Model\Swagger\SecurityDefinitions;
+use PSX\Model\Swagger\SecurityScheme;
 use PSX\Model\Swagger\Swagger;
 use Slim\App;
 
@@ -27,9 +30,7 @@ use Slim\App;
  * @method Api getResponses()
  * @method Api getSchemes()
  * @method Api getSecurity()
- * @method Api getSecurityDefinitions()
  * @method Api getSwagger()
- * @method Api getTags()
  * @method Api getTermsOfService()
  * @method Api getTitle()
  * @method Api getUrl()
@@ -38,7 +39,6 @@ use Slim\App;
  * @method Api setConsumes($consumes)
  * @method Api setDefinitions($definitions)
  * @method Api setDescription($description)
- * @method Api setExternalDocs($externalDocs)
  * @method Api setHost($host)
  * @method Api setInfo($info)
  * @method Api setParameters($parameters)
@@ -69,7 +69,7 @@ class Api {
      */
     public function __construct(App $app, $tags = []) {
         $this->app = $app;
-        $this->tags = $tags;
+        $this->setTags($tags);
     }
 
     /**
@@ -87,7 +87,7 @@ class Api {
     public function get($pattern, $callable) {
         $route = $this->app->get($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -99,7 +99,7 @@ class Api {
     public function post($pattern, $callable) {
         $route = $this->app->post($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -111,7 +111,7 @@ class Api {
     public function put($pattern, $callable) {
         $route = $this->app->put($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -123,7 +123,7 @@ class Api {
     public function patch($pattern, $callable) {
         $route = $this->app->patch($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -135,7 +135,7 @@ class Api {
     public function delete($pattern, $callable) {
         $route = $this->app->delete($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -147,7 +147,7 @@ class Api {
     public function options($pattern, $callable) {
         $route = $this->app->options($pattern, $callable);
         /** @var Route $route */
-        $route->getOperation()->setTags($this->tags);
+        $route->setTags($this->tags);
         return $route;
     }
 
@@ -158,6 +158,12 @@ class Api {
         return $this->app->getContainer()->get("router");
     }
 
+    /**
+     * @return Swagger;
+     */
+    public function getSwaggerModel() {
+        return $this->app->getContainer()->get("swagger");
+    }
     /**
      * @param $licenseIdentifier |License
      * @return $this
@@ -191,6 +197,21 @@ class Api {
     }
 
     /**
+     * @return $this
+     */
+    public function setExternalDocs() {
+        $docs = $this->getExternalDocs();
+        foreach (func_get_args() as $arg) {
+            if (filter_var($arg, FILTER_VALIDATE_URL)) {
+                $docs->setUrl($arg);
+            } else {
+                $docs->setDescription($arg);
+            }
+        }
+        return $this;
+    }
+
+    /**
      * @return ExternalDocs;
      */
     public function getExternalDocs() {
@@ -203,13 +224,26 @@ class Api {
     }
 
     /**
-     * @return Swagger;
+     * @return SecurityDefinitions
      */
-    public function getSwaggerModel() {
-        return $this->app->getContainer()->get("swagger");
+    public function getSecurityDefinitions() {
+        $securityDefinitions = $this->getSwaggerModel()->getSecurityDefinitions();
+        if (is_null($securityDefinitions)) {
+            $securityDefinitions = new SecurityDefinitions();
+            $this->getSwaggerModel()->setSecurityDefinitions($securityDefinitions);
+        }
+        return $securityDefinitions;
     }
 
-
+    /**
+     * @param SecurityScheme $securityScheme
+     * @return $this
+     */
+    public function addSecurityDefinitions(SecurityScheme $securityScheme) {
+        $securityDefinitions = $this->getSecurityDefinitions();
+        $securityDefinitions->append($securityScheme);
+        return $this;
+    }
 
     /**
      * @param $mixed | Contact
@@ -235,8 +269,13 @@ class Api {
         return $this;
     }
 
+    public function getTags() {
+        return $this->tags;
+    }
+
     public function setTags(array $tags) {
         $this->tags = $tags;
+        return $this;
     }
 
     /**
@@ -250,21 +289,24 @@ class Api {
     /**
      * We just forward the method calls to Operation.
      *
-     * @param $name
+     * @param $method_name
      * @param $arguments
      * @return $this
      */
-    public function __call($name, $arguments) {
-        if (method_exists($this->getSwaggerModel(), $name)) {
-            call_user_func_array([$this->getSwaggerModel(), $name], $arguments);
+    public function __call($method_name, $arguments) {
+        $prefix = substr($method_name, 0, 3);
+        $proxied_objects = [
+            $this->getSwaggerModel(),
+            $this->getInfo(),
+            $this->getExternalDocs()
+        ];
+        foreach ($proxied_objects as $proxied_object) {
+            if (method_exists($proxied_object, $method_name)) {
+                $result = call_user_func_array([$proxied_object, $method_name], $arguments);
+                return ($prefix === "set") ? $this : $result;
+            }
         }
-        if (method_exists($this->getInfo(), $name)) {
-            call_user_func_array([$this->getInfo(), $name], $arguments);
-        }
-        if (method_exists($this->getExternalDocs(), $name)) {
-            call_user_func_array([$this->getExternalDocs(), $name], $arguments);
-        }
-        return $this;
+        throw new MethodNotFoundException("Couldn't fint method " . $method_name . " in " . get_class($this) . ".", get_class($this), $method_name);
     }
 }
 
