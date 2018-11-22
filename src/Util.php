@@ -22,6 +22,12 @@ if (!function_exists('is_iterable')) {
     }
 }
 
+/**
+ * Mostly internal in this liberary, just to keep functions small and the future me
+ * happy.
+ *
+ * @package SlimSwagger
+ */
 class Util {
 
     /**

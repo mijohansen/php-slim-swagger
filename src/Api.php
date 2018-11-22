@@ -3,6 +3,7 @@
 namespace SlimSwagger;
 
 use Composer\Spdx\SpdxLicenses;
+use Eloquent\Composer\Configuration\ConfigurationReader;
 use Prophecy\Exception\Doubler\MethodNotFoundException;
 use Psr\Container\ContainerInterface;
 use PSX\Model\Swagger\Contact;
@@ -164,6 +165,7 @@ class Api {
     public function getSwaggerModel() {
         return $this->app->getContainer()->get("swagger");
     }
+
     /**
      * @param $licenseIdentifier |License
      * @return $this
@@ -254,13 +256,16 @@ class Api {
         if (is_a($mixed, Contact::class)) {
             $info->setContact($mixed);
         } else {
-            $contact = new Contact();
+            $contact = $info->getContact();
+            if (is_null($contact)) {
+                $contact = new Contact();
+            }
             foreach (func_get_args() as $arg) {
                 if (filter_var($arg, FILTER_VALIDATE_EMAIL)) {
                     $contact->setEmail($arg);
                 } elseif (filter_var($arg, FILTER_VALIDATE_URL)) {
                     $contact->setUrl($arg);
-                } else {
+                } elseif (!empty($arg)) {
                     $contact->setName($arg);
                 }
             }
@@ -307,6 +312,25 @@ class Api {
             }
         }
         throw new MethodNotFoundException("Couldn't fint method " . $method_name . " in " . get_class($this) . ".", get_class($this), $method_name);
+    }
+
+    /**
+     * Function will read from composer json and set it to swagger.
+     *
+     * @param $composerJsonPath
+     */
+    public function setFromComposerJson($composerJsonPath) {
+        $reader = new ConfigurationReader();
+        /** @var Swagger $swagger */
+        $ob = $reader->read($composerJsonPath);
+        $this->setUrl($ob->homepage());
+        $this->setTitle($ob->name());
+        $this->setDescription($ob->description());
+        foreach ($ob->license() as $licence) {
+            $this->setLicense($licence);
+        }
+        $this->setVersion($ob->version());
+        $this->setContact($ob->vendorName(), $ob->support()->email());
     }
 }
 

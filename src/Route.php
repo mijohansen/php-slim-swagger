@@ -3,6 +3,7 @@
 namespace SlimSwagger;
 
 use Prophecy\Exception\Doubler\MethodNotFoundException;
+use PSX\Model\Swagger\ExternalDocs;
 use PSX\Model\Swagger\Operation;
 use PSX\Model\Swagger\Parameter;
 
@@ -10,7 +11,6 @@ use PSX\Model\Swagger\Parameter;
  * @method Route getConsumes()
  * @method Route getDeprecated()
  * @method Route getDescription()
- * @method Route getExternalDocs()
  * @method Route getOperationId()
  * @method Route getParameters()
  * @method Route getProduces()
@@ -22,7 +22,6 @@ use PSX\Model\Swagger\Parameter;
  * @method Route setConsumes($consumes)
  * @method Route setDeprecated($deprecated)
  * @method Route setDescription($description)
- * @method Route setExternalDocs($externalDocs)
  * @method Route setOperationId($operationId)
  * @method Route setParameters($parameters)
  * @method Route setProduces($produces)
@@ -59,12 +58,41 @@ class Route extends \Slim\Route {
     }
 
     /**
+     * @return $this
+     */
+    public function setExternalDocs() {
+        $externalDocs = $this->getExternalDocs();
+        foreach (func_get_args() as $arg) {
+            if (filter_var($arg, FILTER_VALIDATE_URL)) {
+                $externalDocs->setUrl($arg);
+            } else {
+                $externalDocs->setDescription($arg);
+            }
+        }
+        return $this;
+    }
+
+    /**
+     * @return ExternalDocs;
+     */
+    public function getExternalDocs() {
+        $externalDocs = $this->getOperation()->getExternalDocs();
+        if (is_null($externalDocs)) {
+            $externalDocs = new ExternalDocs();
+            $this->getOperation()->setExternalDocs($externalDocs);
+        }
+        return $externalDocs;
+    }
+
+    public function setResponseClass($responseClass) {
+
+    }
+    /**
      * @param $requestClass
      * @return $this
      */
     public function setRequestClass($requestClass) {
         $name = array_pop(explode("\\", $requestClass));
-        $parameters = $this->getOperation()->getParameters();
         $this->container->get("router")->addDefinition($requestClass);
         $param = new Parameter();
         $param->setIn("body");
@@ -74,13 +102,14 @@ class Route extends \Slim\Route {
         $schema->ref = "#/definitions/" . $name;
         $param->setSchema($schema);
         $param->setType("object");
+        $parameters = $this->getOperation()->getParameters();
         $parameters[] = $param;
         $this->getOperation()->setParameters($parameters);
         return $this;
     }
 
     /**
-     * We just forward the method calls to Operation.
+     * We just proxy the method calls to Operation.
      *
      * @param $method_name
      * @param $arguments

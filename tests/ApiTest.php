@@ -77,11 +77,11 @@ final class ApiTest extends TestCase {
      * @dataProvider provideSimpleSettersAndGetters
      * @param $setter
      * @param $getter
+     * @param $dummy_value
      */
-    public function testSimpleSettersAndGetters($setter, $getter) {
+    public function testSimpleSettersAndGetters($setter, $getter, $dummy_value) {
         $app = new App(SlimSwagger::init());
         $api = new Api($app);
-        $dummy_value = "dummy value";
         $setter_return = call_user_func_array([$api, $setter], [$dummy_value]);
         $this->assertSame($api, $setter_return);
         $getter_return = call_user_func_array([$api, $getter], [$dummy_value]);
@@ -93,43 +93,21 @@ final class ApiTest extends TestCase {
      */
     public function provideSimpleSettersAndGetters() {
         return array(
-            ['setTitle', 'getTitle'],
-            ['setVersion', 'getVersion'],
-            ['setDescription', 'getDescription'],
-            ['setTermsOfService', 'getTermsOfService'],
-            ['setHost', 'getHost'],
-            ['setBasePath', 'getBasePath'],
-            ['setParameters', 'getParameters'],
-            ['setResponses', 'getResponses'],
-            ['setUrl', 'getUrl'],
+            ["setTitle", "getTitle", "dummy_str"],
+            ["setVersion", "getVersion", "dummy_str"],
+            ["setDescription", "getDescription", "dummy_str"],
+            ["setTermsOfService", "getTermsOfService", "dummy_str"],
+            ["setHost", "getHost", "dummy_str"],
+            ["setBasePath", "getBasePath", "dummy_str"],
+            ["setSchemes", "getSchemes", ["dummy_str", "dummy"]],
+            ["setConsumes", "getConsumes", ["dummy_str", "dummy"]],
+            ["setProduces", "getProduces", ["dummy_str", "dummy"]],
+            ["setParameters", "getParameters", "dummy_str"],
+            ["setResponses", "getResponses", "dummy_str"],
+            ["setSecurity", "getSecurity", ["dummy_str", "dummy"]],
+            ["setTags", "getTags", ["dummy_str", "dummy"]],
+            ["setUrl", "getUrl", "dummy_str"],
         );
     }
 
-    /**
-     * @dataProvider provideArraySettersAndGetters
-     * @param $setter
-     * @param $getter
-     */
-    public function testArraySettersAndGetters($setter, $getter) {
-        $app = new App(SlimSwagger::init());
-        $api = new Api($app);
-        $dummy_value = ["dummy value", "other_value"];
-        $setter_return = call_user_func_array([$api, $setter], [$dummy_value]);
-        $this->assertSame($api, $setter_return);
-        $getter_return = call_user_func_array([$api, $getter], [$dummy_value]);
-        $this->assertEquals($dummy_value, $getter_return);
-    }
-
-    /**
-     * @return array
-     */
-    public function provideArraySettersAndGetters() {
-        return array(
-            ['setTags', 'getTags'],
-            ['setSecurity', 'getSecurity'],
-            ['setSchemes', 'getSchemes'],
-            ['setConsumes', 'getConsumes'],
-            ['setProduces', 'getProduces'],
-        );
-    }
 }
