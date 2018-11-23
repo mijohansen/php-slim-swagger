@@ -1,15 +1,17 @@
 sudo: false
 language: php
 php:
-- 7.1
+- 5.5
+- 7.0
 
 before_script:
 - phpenv config-rm xdebug.ini
 - git config --global user.name travis-ci
 - git config --global user.email travis@example.com
+- composer global require hirak/prestissimo --no-interaction --no-suggest
 
 install:
-- composer install --prefer-source --no-interaction --dev
+- composer install --prefer-source --no-interaction --dev --ignore-platform-reqs --no-suggest
 
 script:
 - phpunit

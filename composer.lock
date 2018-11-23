@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-  "content-hash": "cfa15da245495b3e6444ae087ba09409",
+  "content-hash": "cc8723cef3515ee7e4c36694cfffe3a2",
     "packages": [
         {
             "name": "composer/spdx-licenses",
@@ -3145,7 +3145,7 @@
     "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
-      "php": ">=7.1",
+      "php": ">=7.0",
       "ext-json": "*"
     },
   "platform-dev": []
