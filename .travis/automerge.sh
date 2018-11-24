@@ -26,7 +26,7 @@ git checkout "$BRANCH_TO_MERGE_INTO"
 git pull
 
 printf 'Merging %s\n' "$TRAVIS_COMMIT" >&2
-git merge --no-ff "$TRAVIS_COMMIT"
+git merge "$TRAVIS_COMMIT" --no-commit --no-ff
 
 export SEMVER_LAST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
 
