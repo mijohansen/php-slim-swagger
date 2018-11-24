@@ -43,7 +43,8 @@ export TODAYS_DATE=$(date +%Y-%m-%d)
 # To avoid to many versions use the same tag at a certain day
 if [[ $LAST_COMMIT_DATE != $TODAYS_DATE ]]; then
     >&2 echo "Bumping tag"
-    SEMVER_NEW_TAG=$($TRAVIS_BUILD_DIR/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
+    composer global require vierbergenlars/php-semver dev-master
+    SEMVER_NEW_TAG=$($HOME/.composer/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
 else
     >&2 echo "Will use todays patch, just delete it from master, tag: ${SEMVER_LAST_TAG}"
     SEMVER_NEW_TAG=$SEMVER_LAST_TAG

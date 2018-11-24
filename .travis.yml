@@ -31,6 +31,8 @@ jobs:
     script: "BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master .travis/automerge.sh"
     if: branch = develop
 
+
+
 cache:
   directories:
   - "${HOME}/.cache/composer/files"
