@@ -22,11 +22,12 @@
     "slim/slim": "^3.10",
     "psx/schema": "^2.4",
     "composer/spdx-licenses": "^1.4",
-    "doctrine/annotations": "1.4",
-    "eloquent/composer-config-reader": "^2.1"
+    "doctrine/annotations": "^1.4",
+    "eloquent/composer-config-reader": "^2.1",
+    "myclabs/deep-copy": "^1.7"
   },
   "require-dev": {
-    "phpunit/phpunit": "*",
+    "phpunit/phpunit": "^5.7",
     "vierbergenlars/php-semver": "dev-master"
   },
   "autoload": {
