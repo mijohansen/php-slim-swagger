@@ -44,7 +44,7 @@ if [[ $LAST_COMMIT_DATE != $TODAYS_DATE ]]; then
     >&2 echo "Bumping tag"
     SEMVER_NEW_TAG=$($TRAVIS_BUILD_DIR/vendor/bin/semver -v $SEMVER_LAST_TAG -i patch)
 else
-    >&2 echo "Will use todays patch, just delete it from master. ${SEMVER_LAST_TAG}"
+    >&2 echo "Will use todays patch, just delete it from master, tag: ${SEMVER_LAST_TAG}"
     SEMVER_NEW_TAG=$SEMVER_LAST_TAG
     if [[ $SEMVER_LAST_TAG != "0.0.1" ]]; then
         git push "$push_uri" :refs/tags/$SEMVER_LAST_TAG
@@ -54,7 +54,7 @@ fi
 echo "Using tag: $SEMVER_NEW_TAG"
 git tag -f $SEMVER_NEW_TAG &> /dev/null
 
-printf 'Pushing to %s\n' "$TRAVIS_REPO_SLUG" >&2
+printf 'Pushing to the slug: %s\n' "$TRAVIS_REPO_SLUG" >&2
 
 # Redirect to /dev/null to avoid secret leakage
 git push "$push_uri" "$BRANCH_TO_MERGE_INTO" --tags >/dev/null 2>&1
