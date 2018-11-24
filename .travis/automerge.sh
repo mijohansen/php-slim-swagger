@@ -18,10 +18,10 @@ fi
 repo_temp=$(mktemp -d)
 git clone "https://github.com/$TRAVIS_REPO_SLUG" "$repo_temp"
 
-# shellcheck disable=SC2164
 cd "$repo_temp"
 
-printf 'Checking out %s\n' "$BRANCH_TO_MERGE_INTO" >&2
+printf 'Checking out branch to merge into: %s\n' "$BRANCH_TO_MERGE_INTO" >&2
+git fetch origin --prune
 git checkout "$BRANCH_TO_MERGE_INTO"
 
 printf 'Merging %s\n' "$TRAVIS_COMMIT" >&2
