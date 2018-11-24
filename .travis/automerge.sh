@@ -23,9 +23,10 @@ cd "$repo_temp"
 printf 'Checking out branch to merge into: %s\n' "$BRANCH_TO_MERGE_INTO" >&2
 git fetch origin --prune
 git checkout "$BRANCH_TO_MERGE_INTO"
+git pull
 
 printf 'Merging %s\n' "$TRAVIS_COMMIT" >&2
-git merge --ff-only "$TRAVIS_COMMIT"
+git merge --no-ff "$TRAVIS_COMMIT"
 
 export SEMVER_LAST_TAG=$(git describe --abbrev=0 --tags 2>/dev/null)
 
