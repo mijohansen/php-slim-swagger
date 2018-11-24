@@ -36,6 +36,7 @@ if [[ -z $SEMVER_LAST_TAG ]]; then
 else
     LAST_COMMIT_DATE=$(git log -1 --date=short --pretty=format:%cd $SEMVER_LAST_TAG)
 fi
+printf 'Will try to merge %s\n' "$SEMVER_LAST_TAG" >&2
 
 export TODAYS_DATE=$(date +%Y-%m-%d)
 # To avoid to many versions use the same tag at a certain day
