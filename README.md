@@ -27,3 +27,4 @@ use SlimSwagger\SwaggerAction;
 $app->get('/swagger.json', SwaggerAction::class);
 ```
 
+Small change
