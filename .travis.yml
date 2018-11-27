@@ -1,39 +1,36 @@
 sudo: false
 language: php
+php:
+- 5.5
+- 7.0
 
 env:
 - secure: "vto48Lm5IFWush70SRfReZV95mwgyrtg53KMkbhkmsPj0XyVUUO+p2FODuWTdYEqOyz86jr3uBOGlu5LJqJe/fVGtWNaRFD+dwAv23XJf2lC06lj7S0Yn69L/2b3GgotgutOjuYQh4ff5cV5S4gztLFa7R04aYA5wAUsX5edw3F25lvnfpfDp7WGz0OqEZO4ZsZTI4RhzTIFtg4Dhkg5da7TlUAPL4JmiEJDwWnkLWx58C1S0ztpiWAcEGuQR9npHu+A9h0ZFbMb4aJJ3b2ajRtV/4Jzz8iKgOpleZHKo1CzIwJXi3NQ2ySzvzRV57Sa/TSXOc+aR02H2kZRf4POtvqYSANUyNojsG4eCUDeGEe0ZZHi7bVAKPMFRnNcISzhWyg43OQz68CJ2hulVS0V+EzxtVg+YeUbfWbgxrCVo9syy51gJ8y0rlR36d9oEDx8660IwnEGhQimkupfFslAvnS+/+SU0AbbOunnvj+LClmDqpGR49+9G18zu4HMBsJBA16LD28fkVmdiBxqr0P2wASLEXKXlX3LytpVfOTb+fG/N6U+Iir/KV8ky3h+b+YEElIvzcQqi7LoA8RAjLhK9UpwpTRKaEfayTcUPseMBYWYNb9wh09TUEfxBM/OY6Euhb4UOF4zhLE3aIF33DSHwHlMTYUbHlr5gJH2qFUqrMg="
 
-stages:
-- name: lint
-- name: test
-- name: automerge
+before_install:
+- composer global require hirak/prestissimo --no-interaction --no-suggest
+- composer global require phpunit/phpunit
+- phpenv config-rm xdebug.ini
 
-jobs:
-  include:
-  - stage: lint
-    script: find ./src -name "*.php" -print0 | xargs -0 -n1 -P8 php -l
-  - stage: test
-    php: 5.5
-    before_install: chmod a+x .travis/install.sh
-    install: .travis/install.sh
-    script: phpunit
-  - stage: test
-    php: 7.0
-    before_install: chmod a+x .travis/install.sh
-    install: .travis/install.sh
-    script: phpunit
-  - stage: automerge
-    before_script:
-    - git config --global user.name travis-ci
-    - git config --global user.email travis@example.com
-    - chmod a+x .travis/automerge.sh
-    script: "BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master .travis/automerge.sh"
-    if: branch = develop
+install:
+- composer install --prefer-source --no-interaction --dev --ignore-platform-reqs --no-suggest
 
-
+script:
+- find ./src -name "*.php" -print0 | xargs -0 -n1 -P8 php -l
+- phpunit
 
 cache:
   directories:
   - "${HOME}/.cache/composer/files"
   - "${HOME}/.composer/cache/files"
+
+jobs:
+  include:
+  - stage: automerge
+    before_script:
+    - git config --global user.name travis-ci[bot]
+    - git config --global user.email travis[bot]@example.com
+    - chmod a+x .travis/automerge.sh
+    script: "BRANCHES_TO_MERGE_REGEX='^develop' BRANCH_TO_MERGE_INTO=master .travis/automerge.sh"
+    if: branch = develop
+
